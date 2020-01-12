@@ -12,6 +12,10 @@ using CleanArchSolution.Mvc.Data;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Options;
+using CleanArchSolution.Infra.Data.Context;
+
 
 namespace CleanArchSolution.Mvc
 {
@@ -27,6 +31,13 @@ namespace CleanArchSolution.Mvc
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.Configure<CookiePolicyOptions>(Options =>
+            {
+                // This lamda determine weather user consent for non essential cookies
+                Options.CheckConsentNeeded = context => true;
+                Options.MinimumSameSitePolicy = SameSiteMode.None;
+            });
+
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
                     Configuration.GetConnectionString("UniversityIdentityDBConnecion")));
@@ -34,6 +45,15 @@ namespace CleanArchSolution.Mvc
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             services.AddControllersWithViews();
             services.AddRazorPages();
+
+
+            services.AddDbContext<UniversityDBContext>(options =>
+            {
+                options.UseSqlServer(
+                    Configuration.GetConnectionString("UniversityDBConnection"));
+            });
+            services.AddMvc().SetCompatibilityVersion(Microsoft.AspNetCore.Mvc.CompatibilityVersion.Version_3_0);
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
